@@ -72,3 +72,59 @@ User.query.all()
 Post.query.all()
 []
 ```
+## Part 9 - Pagination
+```bash
+posts = Post.query.paginate()
+posts.per_page
+20
+posts.page
+1
+for post in posts.items:
+    print(post)
+```
+
+```bash
+posts = Post.query.paginate(page=2)
+posts.page
+2
+for post in posts.items:
+    print(post)
+```
+
+```bash
+posts = Post.query.paginate(per_page=5)
+for post in posts.items:
+    print(post)
+posts.page
+1
+```
+
+```bash
+posts = Post.query.paginate(per_page=5, page=2)
+posts.page
+2
+for post in posts.items:
+    print(post)
+
+posts.total
+27
+```
+#### http://127.0.0.1:5000/?page=2
+
+```bash
+posts = Post.query.paginate(per_page=2, page=6)
+for page in posts.iter_pages():
+    print(page)
+```
+
+```html
+...
+{% for page_num in posts.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
+...
+```
+
+```python
+posts = Post.query.order_by(Post.date_posted.desc()).paginate(page=page, per_page=5)
+```
+
+

@@ -1,5 +1,5 @@
 from PIL import Image
-import os
+import os, json
 import secrets
 from flask import render_template, url_for, flash, redirect, request, abort
 from flaskblog import app, db, bcrypt
@@ -11,7 +11,8 @@ from flask_login import login_user, current_user, logout_user, login_required
 @app.route('/')
 @app.route('/home')
 def home():
-    posts = Post.query.all()
+    page = request.args.get('page', 1, type=int)
+    posts = Post.query.order_by(Post.date_posted.desc()).paginate(page=page, per_page=5)
     return render_template('home.html', posts=posts)
 
 
@@ -137,3 +138,28 @@ def delete_post(post_id):
     db.session.commit()
     flash('Your post has been deleted!', 'success')
     return redirect(url_for('home'))
+
+
+@app.route('/load_posts')
+def load_posts():
+    posts_path = os.path.join(app.root_path, 'static', 'posts.json')
+    with open(posts_path) as f:
+        data = json.load(f)
+        for post_data in data:
+            author = User.query.get(post_data['user_id'])
+            post = Post(title=post_data['title'], content=post_data['content'], author=author)
+            db.session.add(post)
+        db.session.commit()
+        flash('Your posts have been added!', 'success')
+    return redirect(url_for('home'))
+
+
+@app.route('/user/<string:username>')
+def user_posts(username):
+    pass
+    page = request.args.get('page', 1, type=int)
+    user = User.query.filter_by(username=username).first_or_404()
+    posts = Post.query.filter_by(author=user)\
+        .order_by(Post.date_posted.desc())\
+        .paginate(page=page, per_page=5)
+    return render_template('user_posts.html', posts=posts, user=user)
