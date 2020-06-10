@@ -126,5 +126,48 @@ for page in posts.iter_pages():
 ```python
 posts = Post.query.order_by(Post.date_posted.desc()).paginate(page=page, per_page=5)
 ```
+## Part 10 - Email and Password Reset
 
+```bash
+from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
+s = Serializer('secret', 30)
+token = s.dumps({'user_id': 1}).decode('utf-8')
+token
+'eyJhbGciOiJIUzUxMiIsImlhdCI6MTU5MTY5MDQ0MiwiZXhwIjoxNTkxNjkwNDcyfQ.eyJ1c2VyX2lkIjoxfQ.M0qgbNs0Kin5Hqqnq3GNYHtmvrs3XeFvAXei06fyerIJ8YOz_VmAZ28Hrgsis5ot87yIBhjX0wcTJV7ikYFmew'
+```
 
+```
+s.loads(token)
+{'user_id': 1}
+// after 30 seconds
+s.loads(token)
+...
+itsdangerous.exc.SignatureExpired: Signature expired
+```
+
+## Part 10 - Email and Password Reset
+
+```bash
+pip install flask-mail
+```
+#### add into \__init\__.py:
+```python
+...
+import flask_mail as Mail
+
+...
+app.config['MAIL_SERVER'] = 'smtp.googlemail.com'
+app.config['MAIL_PORT'] = 587
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USERNAME'] = os.environ.get('EMAIL_USER')
+app.config['MAIL_PASSWORD'] = os.environ.get('EMAIL_PASS')
+mail = Mail(app)
+```
+
+```bash
+vim ~/.bashrc-personal
+export EMAIL_USER="your_username@gmail.com"
+export EMAIL_PASS="your_password"
+
+source .bashrc-personal 
+```
