@@ -145,8 +145,6 @@ s.loads(token)
 itsdangerous.exc.SignatureExpired: Signature expired
 ```
 
-## Part 10 - Email and Password Reset
-
 ```bash
 pip install flask-mail
 ```
